@@ -97,9 +97,11 @@ public class ServletThymeleaf extends HttpServlet {
 
             logger.info("Error processing request", e);
 
-            
+
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().println("<html><body><h1>Invalid timezone</h1></body></html>");
+            resp.getWriter().println("<html><body>" +
+                    "<h1>Invalid timezone</h1>" +
+                    "</body></html>");
 
         }
     }
