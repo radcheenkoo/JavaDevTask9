@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.time.DateTimeException;
+import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -22,9 +22,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 
 
-@WebServlet("/thymeleafServlet")
+@WebServlet("/time")
 public class ServletThymeleaf extends HttpServlet {
 
+    private static final String DEFAULT_TIMEZONE = "UTC";
     private static final Logger logger = LoggerFactory.getLogger(ServletThymeleaf.class);
     private TemplateEngine engine;
 
@@ -33,51 +34,65 @@ public class ServletThymeleaf extends HttpServlet {
         engine = new TemplateEngine();
 
         FileTemplateResolver templateResolver = new FileTemplateResolver();
-        templateResolver.setPrefix("D:\\JavaOnlineGoIT\\JavaDevTask9\\src\\main\\resources\\templates\\");
+        templateResolver.setPrefix("src/main/resources/templates/");
         templateResolver.setSuffix(".html");
         templateResolver.setTemplateMode("HTML5");
         templateResolver.setCacheable(false);
         engine.setTemplateResolver(templateResolver);
+
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String timezone = req.getQueryString();
 
-        timezone = timezone.substring(9,timezone.length());
+       String timezone;
 
-        URLDecoder.decode(timezone);
+        if (req.getParameter("timezone") == null){
+            timezone = DEFAULT_TIMEZONE;
+        }else {
+            timezone = req.getParameter("timezone");
+
+
+            timezone = URLDecoder.decode(timezone,StandardCharsets.UTF_8);
+
+             /*
+            я переставляю пробіл на плюса, бо так чомусь метод decode
+            постійно трохи не правильно розкодовував його,без нього не працює.
+             */
+            timezone = timezone.replace(" ", "+");
+        }
+
+        System.out.println(timezone);
 
         if (timezone == null || timezone.isEmpty()) {
             Cookie[] cookies = req.getCookies();
-            if (cookies != null){
-                for (Cookie c: cookies) {
-                    if (c.getName().equals("lastTimezone")){
+            if (cookies != null) {
+                for (Cookie c : cookies) {
+                    if (c.getName().equals("lastTimezone")) {
                         timezone = c.getValue();
+
                         break;
                     }
                 }
             }
-            else if(timezone == null){
-                timezone = "UTC";
+
+            if (timezone == null || timezone.isEmpty()) {
+                timezone = DEFAULT_TIMEZONE;
             }
-        }else {
-
-            Cookie lastTimezoneCookie = new Cookie("lastTimezone",timezone);
-
-            lastTimezoneCookie.setMaxAge(60 * 30);
-            resp.addCookie(lastTimezoneCookie);
         }
 
-
-
         try {
+
             ZoneId zone = ZoneId.of(timezone);
             ZonedDateTime zdt = ZonedDateTime.now(zone);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
             String time = zdt.format(formatter);
 
-            System.out.println(time);
+
+            Cookie lastTimezoneCookie = new Cookie("lastTimezone", timezone);
+
+            lastTimezoneCookie.setMaxAge(10);
+            resp.addCookie(lastTimezoneCookie);
 
 
             Map<String, Object> contextVariables = new HashMap<>();
@@ -90,10 +105,10 @@ public class ServletThymeleaf extends HttpServlet {
             logger.info("Processing request for timezone: {}", timezone);
 
 
-            engine.process("show-time-by-UTC", context,resp.getWriter());
+            engine.process("show-time-by-UTC", context, resp.getWriter());
 
 
-        } catch (DateTimeException e) {
+        } catch (Exception e) {
 
             logger.info("Error processing request", e);
 
