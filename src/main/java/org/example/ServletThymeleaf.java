@@ -62,7 +62,6 @@ public class ServletThymeleaf extends HttpServlet {
             timezone = timezone.replace(" ", "+");
         }
 
-        System.out.println(timezone);
 
         if (timezone == null || timezone.isEmpty()) {
             Cookie[] cookies = req.getCookies();
