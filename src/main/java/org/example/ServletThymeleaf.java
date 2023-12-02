@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -34,7 +35,7 @@ public class ServletThymeleaf extends HttpServlet {
         engine = new TemplateEngine();
 
         FileTemplateResolver templateResolver = new FileTemplateResolver();
-        templateResolver.setPrefix("src/main/resources/templates/");
+        templateResolver.setPrefix("D:\\JavaOnlineGoIT\\JavaDevTask9\\src\\main\\webapp\\WEB-INF\\templates\\");
         templateResolver.setSuffix(".html");
         templateResolver.setTemplateMode("HTML5");
         templateResolver.setCacheable(false);
@@ -80,18 +81,32 @@ public class ServletThymeleaf extends HttpServlet {
             }
         }
 
+        String time = "";
+
         try {
 
             ZoneId zone = ZoneId.of(timezone);
             ZonedDateTime zdt = ZonedDateTime.now(zone);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
-            String time = zdt.format(formatter);
+            time = zdt.format(formatter);
 
+        }catch (DateTimeException e) {
+
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().println("<html><body>" +
+                    "<h1>Invalid timezone</h1>" +
+                    "</body></html>");
+        }
+
+
+        if (!timezone.equals("UTC")){
 
             Cookie lastTimezoneCookie = new Cookie("lastTimezone", timezone);
-
             lastTimezoneCookie.setMaxAge(10);
             resp.addCookie(lastTimezoneCookie);
+
+        }
+
 
 
             Map<String, Object> contextVariables = new HashMap<>();
@@ -104,19 +119,7 @@ public class ServletThymeleaf extends HttpServlet {
             logger.info("Processing request for timezone: {}", timezone);
 
 
-            engine.process("show-time-by-UTC", context, resp.getWriter());
+            engine.process("time", context, resp.getWriter());
 
-
-        } catch (Exception e) {
-
-            logger.info("Error processing request", e);
-
-
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().println("<html><body>" +
-                    "<h1>Invalid timezone</h1>" +
-                    "</body></html>");
-
-        }
     }
 }
