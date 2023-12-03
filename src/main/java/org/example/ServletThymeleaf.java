@@ -46,40 +46,11 @@ public class ServletThymeleaf extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-       String timezone;
+        String timezone = getTimezone(req);
 
-        if (req.getParameter("timezone") == null){
-            timezone = DEFAULT_TIMEZONE;
-        }else {
-            timezone = req.getParameter("timezone");
+        timezone = URLDecoder.decode(timezone,StandardCharsets.UTF_8);
+        timezone = timezone.replace(" ", "+");
 
-
-            timezone = URLDecoder.decode(timezone,StandardCharsets.UTF_8);
-
-             /*
-            я переставляю пробіл на плюса, бо так чомусь метод decode
-            постійно трохи не правильно розкодовував його,без нього не працює.
-             */
-            timezone = timezone.replace(" ", "+");
-        }
-
-
-        if (timezone == null || timezone.isEmpty()) {
-            Cookie[] cookies = req.getCookies();
-            if (cookies != null) {
-                for (Cookie c : cookies) {
-                    if (c.getName().equals("lastTimezone")) {
-                        timezone = c.getValue();
-
-                        break;
-                    }
-                }
-            }
-
-            if (timezone == null || timezone.isEmpty()) {
-                timezone = DEFAULT_TIMEZONE;
-            }
-        }
 
         String time = "";
 
@@ -120,6 +91,29 @@ public class ServletThymeleaf extends HttpServlet {
 
 
             engine.process("time", context, resp.getWriter());
+
+    }
+
+    private String getTimezone(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if(cookies != null) {
+            for (Cookie c: cookies) {
+                if (c.getName().equals("lastTimezone")) {
+                    return c.getValue();
+                }
+            }
+        }
+
+        if (request.getParameter("timezone") == null) {
+            return DEFAULT_TIMEZONE;
+        }
+
+        if (!request.getParameter("timezone").isEmpty()) {
+            return request.getParameter("timezone");
+        }
+
+        return DEFAULT_TIMEZONE;
 
     }
 }
