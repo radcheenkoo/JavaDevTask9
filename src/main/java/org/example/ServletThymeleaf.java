@@ -35,8 +35,7 @@ public class ServletThymeleaf extends HttpServlet {
         engine = new TemplateEngine();
 
         FileTemplateResolver templateResolver = new FileTemplateResolver();
-        // templateResolver.setPrefix("D:\\JavaOnlineGoIT\\JavaDevTask9\\src\\main\\webapp\\WEB-INF\\templates\\");
-        templateResolver.setPrefix("src/main/webapp/WEB-INF/templates/");
+        templateResolver.setPrefix("D:\\JavaOnlineGoIT\\JavaDevTask9\\src\\main\\webapp\\WEB-INF\\templates\\");
         templateResolver.setSuffix(".html");
         templateResolver.setTemplateMode("HTML5");
         templateResolver.setCacheable(false);
