@@ -35,7 +35,8 @@ public class ServletThymeleaf extends HttpServlet {
         engine = new TemplateEngine();
 
         FileTemplateResolver templateResolver = new FileTemplateResolver();
-        templateResolver.setPrefix("D:\\JavaOnlineGoIT\\JavaDevTask9\\src\\main\\webapp\\WEB-INF\\templates\\");
+        // templateResolver.setPrefix("D:\\JavaOnlineGoIT\\JavaDevTask9\\src\\main\\webapp\\WEB-INF\\templates\\");
+        templateResolver.setPrefix("src/main/webapp/WEB-INF/templates/");
         templateResolver.setSuffix(".html");
         templateResolver.setTemplateMode("HTML5");
         templateResolver.setCacheable(false);
@@ -70,7 +71,7 @@ public class ServletThymeleaf extends HttpServlet {
         }
 
 
-        if (!timezone.equals("UTC")){
+        if (!timezone.equals(DEFAULT_TIMEZONE)){
 
             Cookie lastTimezoneCookie = new Cookie("lastTimezone", timezone);
             lastTimezoneCookie.setMaxAge(10);
@@ -100,6 +101,9 @@ public class ServletThymeleaf extends HttpServlet {
         if(cookies != null) {
             for (Cookie c: cookies) {
                 if (c.getName().equals("lastTimezone")) {
+
+                    System.out.println(c.getValue());
+
                     return c.getValue();
                 }
             }
