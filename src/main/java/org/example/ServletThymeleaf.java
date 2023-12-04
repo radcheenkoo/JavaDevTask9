@@ -101,9 +101,6 @@ public class ServletThymeleaf extends HttpServlet {
         if(cookies != null) {
             for (Cookie c: cookies) {
                 if (c.getName().equals("lastTimezone")) {
-
-                    System.out.println(c.getValue());
-
                     return c.getValue();
                 }
             }
